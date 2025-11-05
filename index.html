@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Akash Vibes 🎵</title>
+<style>
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #111;
+    --card-color: #f2f2f2;
+    --accent-color: #007aff;
+  }
+
+  body.dark {
+    --bg-color: #0e0e0e;
+    --text-color: #fff;
+    --card-color: #1c1c1c;
+    --accent-color: #00b7ff;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background 0.5s, color 0.5s;
+  }
+
+  header {
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px;
+    letter-spacing: 1px;
+    background: var(--card-color);
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: var(--card-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 100;
+  }
+
+  .theme-toggle:hover {
+    background: var(--accent-color);
+    color: white;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    gap: 15px;
+  }
+
+  .song-card {
+    background: var(--card-color);
+    width: 95%;
+    max-width: 450px;
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .song-card:hover {
+    transform: scale(1.03);
+    background: rgba(0,0,0,0.05);
+  }
+
+  .three-dots {
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .song-detail {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .song-detail.active {
+    display: flex;
+  }
+
+  .song-info {
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  audio {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .back-btn {
+    margin-top: 15px;
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+  }
+
+  .download-btn {
+    margin-top: 10px;
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()">🌗 Mode</button>
+<header>🎧 Akash Vibes</header>
+
+<div class="container" id="library"></div>
+
+<div class="song-detail" id="detail">
+  <div class="song-info" id="songInfo"></div>
+  <audio id="audio" controls></audio>
+  <button class="download-btn" id="downloadBtn">Download</button>
+  <button class="back-btn" onclick="backToLibrary()">Back</button>
+</div>
+
+<script>
+const songs = [
+  {file: "Aaj se teri.mp3", title: "Aaj Se Teri", singer: "Arijit Singh", composer: "Amit Trivedi", lyricist: "Kausar Munir", movie: "PadMan (2018)"},
+  {file: "Apa Fer Milange.mp3", title: "Apa Fer Milange", singer: "Savi Kahlon", composer: "The Masterz", lyricist: "Savi Kahlon", movie: "Single / Punjabi"},
+  {file: "Bulleya.mp3", title: "Bulleya", singer: "Amit Mishra & Shilpa Rao", composer: "Pritam", lyricist: "Amitabh Bhattacharya", movie: "Ae Dil Hai Mushkil (2016)"},
+  {file: "Dekha ek khwab.mp3", title: "Dekha Ek Khwab", singer: "Kishore Kumar & Lata Mangeshkar", composer: "Shiv‑Hari", lyricist: "Javed Akhtar", movie: "Silsila (1981)"},
+  {file: "Falak Tak Chal Sath Mere.mp3", title: "Falak Tak Chal Sath Mere", singer: "Udit Narayan & Mahalaxmi Iyer", composer: "Vishal‑Shekhar", lyricist: "Kausar Munir", movie: "Tashan (2008)"},
+  {file: "Hum Tere Pyar mein.mp3", title: "Hum Tere Pyar Mein", singer: "Lata Mangeshkar", composer: "Shankar‑Jaikishan", lyricist: "Hasrat Jaipuri", movie: "Dil Ek Mandir (1963)"},
+  {file: "Itna Na Mujhse Tu Pyaar Badha.mp3", title: "Itna Na Mujhse Tu Pyaar Badha", singer: "Lata Mangeshkar & Talat Mahmood", composer: "Salil Chowdhary", lyricist: "Rajendra Krishan", movie: "Chhaya (?)"},
+  {file: "Labon Ko.mp3", title: "Labon Ko", singer: "K.K.", composer: "Pritam", lyricist: "Sayeed Quadri", movie: "Bhool Bhulaiyaa (2007)"},
+  {file: "Mere Samnewali Khidki Mein.mp3", title: "Mere Samnewali Khidki Mein", singer: "Kishore Kumar", composer: "R.D. Burman", lyricist: "Rajendra Krishan", movie: "Padosan (1968)"},
+  {file: "O Re Piya.mp3", title: "O Re Piya", singer: "Rahat Fateh Ali Khan", composer: "Salim‑Sulaiman", lyricist: "Jaideep Sahni & Piyush Mishra", movie: "Aaja Nachle (2007)"},
+  {file: "Sanson Ki Mala Pe.mp3", title: "Sanson Ki Mala Pe", singer: "Nusrat Fateh Ali Khan", composer: "—", lyricist: "Meera Bai / Tufail Hoshiarpuri", movie: "Non‑movie devotional / qawwali"},
+  {file: "saudebaazi.mp3", title: "Saude Bazi", singer: "Anupam Amod", composer: "Pritam", lyricist: "Irshad Kamil", movie: "Aakrosh (2010)"},
+  {file: "Toota Jo Kabhi Tara.mp3", title: "Toota Jo Kabhi Tara", singer: "Atif Aslam & others", composer: "Sachin‑Jigar", lyricist: "Priya Saraiya", movie: "A Flying Jatt (2016)"},
+  {file: "Tu Hi Haqeeqat.mp3", title: "Tu Hi Haqeeqat", singer: "Javed Ali, Irshan Ashraf & Shadab", composer: "Pritam", lyricist: "Sayeed Quadri", movie: "Tum Mile (2009)"}
+];
+
+const library = document.getElementById('library');
+const detail = document.getElementById('detail');
+const songInfo = document.getElementById('songInfo');
+const audio = document.getElementById('audio');
+const downloadBtn = document.getElementById('downloadBtn');
+
+songs.forEach((song, index) => {
+  const card = document.createElement('div');
+  card.classList.add('song-card');
+  card.innerHTML = `<span>${song.title}</span><span class="three-dots" onclick="downloadSong(event, ${index})">⋮</span>`;
+  card.addEventListener('click', () => showDetail(index));
+  library.appendChild(card);
+});
+
+function showDetail(index){
+  const s = songs[index];
+  songInfo.innerHTML = `<strong>${s.title}</strong><br>Singer: ${s.singer}<br>Composer: ${s.composer}<br>Lyricist: ${s.lyricist}<br>Movie: ${s.movie}`;
+  audio.src = s.file;
+  audio.play();
+  library.style.display = 'none';
+  detail.classList.add('active');
+}
+
+function backToLibrary(){
+  audio.pause();
+  detail.classList
